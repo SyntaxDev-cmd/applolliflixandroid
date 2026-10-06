@@ -1,0 +1,25 @@
+{
+  "name": "lolliflix-android",
+  "version": "1.1.0",
+  "description": "LOLLIFLIX - App Android (Capacitor)",
+  "private": true,
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "vendor": "node scripts/copy-vendor.js",
+    "add": "cap add android",
+    "patch": "node scripts/patch-android.js",
+    "sync": "npm run vendor && npm run patch && cap sync android",
+    "open": "cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.5.2",
+    "hls.js": "1.5.17"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.2"
+  }
+}

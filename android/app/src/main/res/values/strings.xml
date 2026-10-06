@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">LOLLIFLIX</string>
+    <string name="title_activity_main">LOLLIFLIX</string>
+    <string name="package_name">com.lolliflix.app</string>
+    <string name="custom_url_scheme">com.lolliflix.app</string>
+</resources>

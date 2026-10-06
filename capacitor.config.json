@@ -1,0 +1,25 @@
+{
+  "appId": "com.lolliflix.app",
+  "appName": "LOLLIFLIX",
+  "webDir": "www",
+  "backgroundColor": "#07070d",
+  "zoomEnabled": false,
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true
+  },
+  "android": {
+    "allowMixedContent": true
+  },
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": false
+    },
+    "SystemBars": {
+      "hidden": true,
+      "style": "DARK",
+      "insetsHandling": "css",
+      "initialViewportFitValueHint": "cover"
+    }
+  }
+}
