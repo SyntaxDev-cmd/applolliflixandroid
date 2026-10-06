@@ -1,0 +1,104 @@
+name: Build LOLLIFLIX APK
+
+# Gera o APK na nuvem (nao precisa de Android Studio no seu PC).
+# IMPORTANTE: suba a PASTA "android-app" como RAIZ do repositorio,
+# assim este arquivo fica em .github/workflows/android.yml na raiz.
+# Depois: aba Actions > "Build LOLLIFLIX APK" > Run workflow.
+# Ao terminar, baixe o APK em "Artifacts".
+#
+# PLAY STORE (opcional): cadastre os secrets abaixo em
+# Settings > Secrets and variables > Actions para gerar tambem o AAB assinado:
+#   KEYSTORE_BASE64   = sua keystore (.jks) convertida em base64
+#   KEYSTORE_PASSWORD = senha da keystore
+#   KEY_ALIAS         = alias da chave
+#   KEY_PASSWORD      = senha da chave
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      # O runner ubuntu ja vem com o Android SDK instalado (licencas aceitas).
+      ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+      HAS_KEYSTORE: ${{ secrets.KEYSTORE_BASE64 != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Conferir arquivos enviados
+        run: ls -la
+
+      # Capacitor 8 (target API 36, exigido pela Play Store) precisa de Node 22+ e JDK 21
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup Java (JDK 21)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Instalar dependencias
+        run: npm install --no-audit --no-fund
+
+      - name: Copiar hls.js para dentro do app
+        run: npm run vendor
+
+      - name: Adicionar plataforma Android
+        run: npx cap add android
+
+      - name: Gerar icones e splash (opcional)
+        run: npx --yes @capacitor/assets@3 generate --android || echo "assets ignorado (usando icone padrao)"
+
+      # Paisagem travada, modo imersivo, suporte a controle/TV, versao e assinatura
+      - name: Ajustes nativos (orientacao, tela cheia, TV, versao)
+        run: |
+          node scripts/patch-android.js
+          echo "--- AndroidManifest ---"; cat android/app/src/main/AndroidManifest.xml
+
+      - name: Sincronizar (cap sync)
+        run: npx cap sync android
+
+      - name: Build APK (debug)
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Publicar APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: LOLLIFLIX-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+
+      # ---------- Play Store: AAB assinado (so roda se os secrets existirem) ----------
+      - name: Preparar keystore
+        if: env.HAS_KEYSTORE == 'true'
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release.jks"
+
+      - name: Build AAB + APK (release assinado)
+        if: env.HAS_KEYSTORE == 'true'
+        working-directory: android
+        env:
+          LOLLI_KEYSTORE_FILE: ${{ runner.temp }}/release.jks
+          LOLLI_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          LOLLI_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          LOLLI_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: ./gradlew bundleRelease assembleRelease --no-daemon --stacktrace
+
+      - name: Publicar AAB/APK release
+        if: env.HAS_KEYSTORE == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: LOLLIFLIX-RELEASE
+          path: |
+            android/app/build/outputs/bundle/release/*.aab
+            android/app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
