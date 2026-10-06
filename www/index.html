@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no" />
+  <meta http-equiv="Content-Security-Policy" content="default-src * 'self' 'unsafe-inline' 'unsafe-eval' data: blob: mediastream:; img-src * data: blob:; media-src * data: blob:; connect-src *; script-src * 'unsafe-inline' 'unsafe-eval';" />
+  <title>LOLLIFLIX</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="appbg"></div>
+  <div id="app"></div>
+
+  <div id="player">
+    <video id="videoEl" playsinline></video>
+    <div id="playerSpinner" class="spinner-lg"></div>
+    <div id="plStatus"></div>
+    <div id="playerError">
+      <div id="plErrMsg"></div>
+      <button class="btn" id="plRetry">Tentar novamente</button>
+    </div>
+    <div id="plUi">
+      <div id="plTop">
+        <button class="pl-btn" id="plBack" title="Voltar"></button>
+        <div id="playerTitle"></div>
+        <span class="pl-live">AO VIVO</span>
+      </div>
+      <div id="plCenter">
+        <button class="pl-big sm" id="plPrev" title="Voltar 10s / canal anterior"></button>
+        <button class="pl-big" id="plPlay" title="Play/Pause"></button>
+        <button class="pl-big sm" id="plNext" title="Avancar 10s / proximo canal"></button>
+      </div>
+      <div id="playerBar">
+        <div class="pl-seek" id="plSeekWrap">
+          <span id="plCur">0:00</span>
+          <div class="pl-track"><div id="plBuf"></div><input type="range" id="plSeek" min="0" max="1000" value="0" step="1" /></div>
+          <span id="plDur">0:00</span>
+        </div>
+        <button class="pl-btn" id="plMute" title="Mudo"></button>
+        <button class="pl-btn" id="plFit" title="Formato da tela"></button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <!-- hls.js vai junto com o app (npm run vendor). Se faltar, usa a CDN como reserva. -->
+  <script src="js/vendor/hls.min.js" onerror="document.write('<script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.17/hls.min.js&quot;><\/script>')"></script>
+  <script src="js/net.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
