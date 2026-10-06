@@ -50,8 +50,12 @@ jobs:
       - name: Copiar hls.js para dentro do app
         run: npm run vendor
 
+      # A pasta android/ e sempre gerada do zero aqui. Se ela foi enviada junto
+      # para o repositorio, e descartada (senao o "cap add" falha: "already exists").
       - name: Adicionar plataforma Android
-        run: npx cap add android
+        run: |
+          rm -rf android
+          npx cap add android
 
       - name: Gerar icones e splash (opcional)
         run: npx --yes @capacitor/assets@3 generate --android || echo "assets ignorado (usando icone padrao)"
